@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Calorie Tracker</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f3e8ff, #e0c3fc);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(147, 51, 234, 0.2);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #9333ea, #c084fc);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            position: relative;
+        }
+
+        header::before {
+            content: "Apple Icon";
+            font-size: 1.8rem;
+            position: absolute;
+            left: 20px;
+            top: 18px;
+        }
+
+        .form-section {
+            padding: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border: 2px solid #e0c3fc;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: #faf5ff;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #9333ea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #9333ea, #c084fc);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(147, 51, 234, 0.4);
+        }
+
+        .results {
+            background: #f8f5ff;
+            padding: 20px;
+            border-radius: 0 0 24px 24px;
+            border-top: 3px solid #e0c3fc;
+            display: none;
+        }
+
+        .results h3 {
+            text-align: center;
+            color: #9333ea;
+            margin-top: 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .result-item {
+            margin: 12px 0;
+            font-size: 1rem;
+            color: #6b21a8;
+        }
+
+        .result-item strong {
+            color: #4c1d95;
+        }
+
+        .success-msg {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .success-msg::before {
+            content: "Checkmark";
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container { margin: 10px; }
+            header { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        Calorie Tracker
+    </header>
+
+    <div class="form-section">
+        <input type="text" id="userName" placeholder="Name" value="Sharon">
+        <input type="number" id="dailyGoal" placeholder="Daily Goal (kcal)" value="2000">
+        <input type="number" class="meal" placeholder="Meal 1 (kcal)" value="500">
+        <input type="number" class="meal" placeholder="Meal 2 (kcal)" value="700">
+        <input type="number" class="meal" placeholder="Meal 3 (kcal)" value="600">
+        <input type="number" class="meal" placeholder="Meal 4 (kcal)" value="200">
+
+        <button class="calculate-btn" id="calculateBtn">Calculate</button>
+    </div>
+
+    <div class="results" id="results">
+        <h3>Results</h3>
+        <div class="result-item">Name: <strong id="resName">Sharon</strong></div>
+        <div class="result-item">Daily Goal: <strong id="resGoal">2000 kcal</strong></div>
+        <div class="result-item">Total Consumed: <strong id="resConsumed">2000 kcal</strong></div>
+        <div class="success-msg" id="resMessage">
+            Remaining Calories: <span id="resRemaining">0 kcal</span> You are within your goal!
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Auto-calculate on any input change
+        $('#userName, #dailyGoal, .meal').on('input', calculate);
+
+        // Also on button click
+        $('#calculateBtn').click(calculate);
+
+        function calculate() {
+            let name = $('#userName').val().trim() || 'User';
+            let goal = parseFloat($('#dailyGoal').val()) || 0;
+
+            let total = 0;
+            $('.meal').each(function() {
+                let val = parseFloat($(this).val()) || 0;
+                total += val;
+            });
+
+            let remaining = goal - total;
+            let withinGoal = remaining >= 0;
+
+            // Update results
+            $('#resName').text(name);
+            $('#resGoal').text(goal.toLocaleString() + ' kcal');
+            $('#resConsumed').text(total.toLocaleString() + ' kcal');
+            $('#resRemaining').text(Math.abs(remaining).toLocaleString() + ' kcal');
+
+            let msg = withinGoal 
+                ? `You are within your goal!` 
+                : `You exceeded by ${Math.abs(remaining).toLocaleString()} kcal`;
+
+            $('#resMessage').html(`
+                Remaining Calories: <strong>${remaining >= 0 ? remaining : 0} kcal</strong> 
+                ${withinGoal ? 'Checkmark' : 'Cross'} ${msg}
+            `).css('color', withinGoal ? '#2e7d32' : '#d32f2f');
+
+            $('#results').fadeIn(500);
+        }
+
+        // Initialize
+        calculate();
+    });
+</script>
+
+</body>
+</html>
