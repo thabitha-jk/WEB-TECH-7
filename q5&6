@@ -1,0 +1,39 @@
+df = pd.read_csv("B5_penguins_SLP.csv")
+
+print(df.select_dtypes(include=['object']).shape[1], "categorical")
+print(df.select_dtypes(include=['number']).shape[1], "numerical")
+
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+le = LabelEncoder()
+for col in df.select_dtypes(include=['object']):
+    df[col] = le.fit_transform(df[col])
+
+X = df[['bill_length_mm','bill_depth_mm','flipper_length_mm','body_mass_g']].values
+Y = df['species'].values
+
+X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.2)
+
+weights = np.zeros(X.shape[1])
+bias = 0
+lr = 0.01
+
+errors = []
+
+for _ in range(100):
+    linear = np.dot(X_train,weights)+bias
+    pred = np.where(linear>=0,1,0)
+    error = Y_train - pred
+    
+    weights += lr*np.dot(X_train.T,error)
+    bias += lr*np.sum(error)
+    
+    errors.append(np.mean(np.abs(error)))
+
+plt.plot(errors)
+plt.show()
+
+Ypred = np.where(np.dot(X_test,weights)+bias>=0,1,0)
+
+print(confusion_matrix(Y_test,Ypred))
+print("Accuracy:", accuracy_score(Y_test,Ypred))
