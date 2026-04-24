@@ -1,0 +1,24 @@
+df = pd.read_csv("B5_iris_regression.csv")
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+print(df.describe())
+
+sns.swarmplot(y=df['SepalLengthCm'])
+plt.show()
+
+X = df[['SepalLengthCm','PetalLengthCm']]
+Y = df['SepalWidthCm']
+
+# Add bias
+X_b = np.c_[np.ones(len(X)), X]
+
+# Normal equation
+beta = np.linalg.inv(X_b.T.dot(X_b)).dot(X_b.T).dot(Y)
+
+Ypred = X_b.dot(beta)
+
+SSE = np.sum((Y - Ypred)**2)
+r2 = r2_score(Y, Ypred)
+
+print("b0,b1,b2:", beta)
+print("SSE:", SSE, "R2:", r2)
