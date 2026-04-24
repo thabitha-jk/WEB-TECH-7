@@ -1,0 +1,25 @@
+df = pd.read_csv("B5_Stores.csv")
+
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+# Boxplot
+sns.boxplot(df['Quantity'])
+plt.show()
+
+X = df[['Age']].values
+Y = df['Price'].values
+
+b1 = np.sum((X - X.mean())*(Y - Y.mean())) / np.sum((X - X.mean())**2)
+b0 = Y.mean() - b1*X.mean()
+
+Ypred = b0 + b1*X
+
+plt.scatter(X, Y)
+plt.plot(X, Ypred, color='red')
+plt.show()
+
+SSE = np.sum((Y - Ypred.flatten())**2)
+r2 = r2_score(Y, Ypred)
+
+print("b0:", b0, "b1:", b1)
+print("SSE:", SSE, "R2:", r2)
