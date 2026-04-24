@@ -1,0 +1,49 @@
+df = pd.read_csv("B5_iris_regression.csv")
+
+print(df.isnull().mean()*100)
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+scaler = MinMaxScaler()
+df['SepalPetalWidthCm'] = scaler.fit_transform(df[['SepalPetalWidthCm']])
+
+sns.scatterplot(x=df['SepalLengthCm'], y=df['SepalPetalWidthCm'])
+plt.show()
+
+le = LabelEncoder()
+df['Species'] = le.fit_transform(df['Species'])
+
+X = df[['SepalWidthCm','SepalLengthCm','PetalWidthCm','PetalLengthCm']].values
+Y = df['Species'].values
+
+X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.2)
+
+# Sigmoid
+def sigmoid(z):
+    return 1/(1+np.exp(-z))
+
+weights = np.zeros(X.shape[1])
+bias = 0
+lr = 0.01
+
+costs = []
+
+for i in range(1000):
+    linear = np.dot(X_train, weights) + bias
+    pred = sigmoid(linear)
+    
+    cost = -np.mean(Y_train*np.log(pred+1e-9) + (1-Y_train)*np.log(1-pred+1e-9))
+    costs.append(cost)
+    
+    dw = np.dot(X_train.T,(pred-Y_train))/len(Y_train)
+    db = np.sum(pred-Y_train)/len(Y_train)
+    
+    weights -= lr*dw
+    bias -= lr*db
+
+plt.plot(costs)
+plt.show()
+
+Ypred = (sigmoid(np.dot(X_test,weights)+bias) > 0.5).astype(int)
+
+print(confusion_matrix(Y_test,Ypred))
+print("Accuracy:", accuracy_score(Y_test,Ypred))
