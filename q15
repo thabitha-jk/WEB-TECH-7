@@ -1,0 +1,36 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import skfuzzy as fuzz
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+
+df = pd.read_csv("B5_wineFCM.csv")
+
+# % null values
+print((df.isnull().sum()/len(df))*100)
+
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+# Boxplot for Alcohol
+sns.boxplot(df['Alcohol'])
+plt.show()
+
+# Standardization
+scaler = StandardScaler()
+X = scaler.fit_transform(df.values)
+
+# Fuzzy C-Means
+cntr, u, _, _, _, _, _ = fuzz.cluster.cmeans(
+    X.T, c=2, m=2, error=0.005, maxiter=1000
+)
+
+labels = np.argmax(u, axis=0)
+
+print("Centroids:\n", cntr)
+print("Silhouette Score:", silhouette_score(X, labels))
+
+# Visualization
+plt.scatter(X[:,0], X[:,1], c=labels)
+plt.show()
