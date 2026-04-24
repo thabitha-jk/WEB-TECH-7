@@ -1,0 +1,22 @@
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import AgglomerativeClustering
+
+df = pd.read_csv("B5_penguins_SLP.csv")
+df.fillna(df.mean(numeric_only=True), inplace=True)
+
+scaler = StandardScaler()
+X = scaler.fit_transform(df[['bill_length_mm','bill_depth_mm','flipper_length_mm','body_mass_g']])
+
+Z = linkage(X, method='single')
+
+dendrogram(Z)
+plt.show()
+
+model = AgglomerativeClustering(n_clusters=3, linkage='single')
+labels = model.fit_predict(X)
+
+print("Silhouette:", silhouette_score(X, labels))
+print("DB Index:", davies_bouldin_score(X, labels))
+
+plt.scatter(X[:,0],X[:,1],c=labels)
+plt.show()
